@@ -1,0 +1,31 @@
+name: "godot-ci export"
+on: push
+
+env:
+  GODOT_VERSION: 4.3
+  EXPORT_NAME: Test
+  WIN_BUILD_PATH: /tmp/build/win-x86-64
+  WIN_EXPORT_TEMPLATE: /usr/local/share/godot/templates/windows_release_x86_64.exe
+  LINUX_BUILD_PATH: /tmp/build/linux-x86-64
+  LINUX_EXPORT_TEMPLATE: /usr/local/share/godot/templates/linux_release.x86_64
+  MACOS_BUILD_PATH: /tmp/build/macOS-x86-64
+  MACOS_EXPORT_TEMPLATE: /usr/local/share/godot/templates/macos.zip
+
+jobs:
+  export-windows:
+    name: Windows Export
+    runs-on: ubuntu-20.04
+    container:
+      image: stalker2106x/godot-ci:4.3-mono
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Windows Build
+        run: |
+          mkdir -p "$WIN_BUILD_PATH"
+          godot --headless --export-release "Windows Desktop" "$WIN_BUILD_PATH/$EXPORT_NAME.exe"
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: "${{env.EXPORT_NAME}}-${{env.GITHUB_REF_NAME}}-win_x86-64"
+          path: "${{env.WIN_BUILD_PATH}}/**/*"
